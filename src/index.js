@@ -140,11 +140,29 @@ function json(data, status = 200) {
   });
 }
 
+function getDeviceId(request) {
+  const cookie = request.headers.get("cookie") || "";
+  const match = cookie.match(
+    /(?:^|;\s*)umc_device=([0-9a-f-]{36})(?:;|$)/i
+  );
+
+  return match ? match[1] : null;
+}
+
 function userFrom(request) {
-  const email = request.headers.get("cf-access-authenticated-user-email");
+  const email = request.headers.get(
+    "cf-access-authenticated-user-email"
+  );
+
+  const deviceId = getDeviceId(request);
+
   return {
-    id: email?.trim().toLowerCase() || null,
-    email,
+    id: email
+      ? `access:${email.trim().toLowerCase()}`
+      : deviceId
+        ? `device:${deviceId}`
+        : null,
+    email: email || null,
   };
 }
 
@@ -298,8 +316,23 @@ async function apiHandler(request, env, url, user) {
     if (!part) return new Response("Not found", { status: 404 });
     const object = await env.AUDIO.get(part.r2_key);
     if (!object) return new Response("Not found", { status: 404 });
-    const headers = new Headers();
-    object.writeHttpMetadata(headers);
+const headers = new Headers({
+  "content-type": "text/html; charset=utf-8",
+  "cache-control": "no-store",
+  "content-security-policy":
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src 'self' blob:; connect-src 'self'; img-src 'self' data:",
+  "referrer-policy": "no-referrer",
+  "x-content-type-options": "nosniff",
+});
+
+if (!getDeviceId(request)) {
+  headers.append(
+    "set-cookie",
+    `umc_device=${crypto.randomUUID()}; Path=/; Max-Age=31536000; HttpOnly; Secure; SameSite=Lax`
+  );
+}
+
+return new Response(page, { headers });    object.writeHttpMetadata(headers);
     headers.set("content-type", part.mime);
     headers.set("cache-control", "private, no-store");
     headers.set("content-disposition", `inline; filename="meeting-part-${audioRoute[2]}.${extensionFor(part.mime)}"`);
