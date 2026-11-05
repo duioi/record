@@ -21,7 +21,7 @@ const page = String.raw`<!doctype html>
     .shell{max-width:1440px;margin:auto;padding:22px 28px 40px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px}.mark{width:42px;height:42px;border-radius:13px;background:var(--green);display:grid;place-items:center;color:white;font-weight:800;letter-spacing:-1px}.brand h1{font-size:18px;margin:0}.brand p{font-size:12px;color:var(--muted);margin:3px 0 0}.topmeta{display:flex;align-items:center;gap:10px}.pill{border:1px solid var(--line);background:rgba(255,255,255,.7);padding:8px 12px;border-radius:999px;font-size:12px;color:var(--muted)}.online:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#2e8a62;margin-right:7px}.offline:before{background:var(--red)}
     .layout{display:grid;grid-template-columns:310px minmax(0,1fr) 330px;gap:18px}.panel{background:rgba(255,254,249,.92);border:1px solid rgba(202,204,196,.9);border-radius:22px;box-shadow:var(--shadow)}.side{padding:20px;height:calc(100vh - 112px);min-height:650px;position:sticky;top:20px;display:flex;flex-direction:column}.side h2,.right h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 16px}.field{margin-bottom:14px}.field label{display:block;font-size:12px;font-weight:650;margin-bottom:7px}.input{width:100%;border:1px solid var(--line);border-radius:12px;background:white;padding:11px 12px;color:var(--ink);outline:none}.input:focus{border-color:#6e9285;box-shadow:0 0 0 3px rgba(23,76,60,.09)}
     .record-orb{width:152px;height:152px;border-radius:50%;margin:18px auto 22px;border:1px solid #cfd7d1;background:radial-gradient(circle at 40% 30%,#fff 0,#e9eee8 60%,#d7dfda);display:grid;place-items:center;position:relative;box-shadow:inset 0 0 0 13px rgba(255,255,255,.55)}.record-orb:after{content:"";width:54px;height:54px;background:var(--red);border-radius:50%;box-shadow:0 0 0 9px rgba(182,58,53,.12)}.recording .record-orb:after{animation:pulse 1.6s infinite}.paused .record-orb:after{border-radius:10px;background:var(--amber);animation:none}@keyframes pulse{50%{box-shadow:0 0 0 22px rgba(182,58,53,0)}}
-    .timer{text-align:center;font-variant-numeric:tabular-nums;font-size:34px;font-weight:700;letter-spacing:.04em}.state{text-align:center;color:var(--muted);font-size:12px;margin:5px 0 18px}.primary{width:100%;border:0;border-radius:13px;background:var(--green);color:white;padding:13px 15px;font-weight:700}.controls{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}.secondary,.danger,.ghost{border:1px solid var(--line);border-radius:12px;background:white;padding:11px;font-weight:650}.danger{color:var(--red);border-color:#e7c8c4}.side-foot{margin-top:auto;border-top:1px solid var(--line);padding-top:14px}.sync-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:7px 0}.sync-row strong{color:var(--ink)}
+    .audio-monitor{border:1px solid var(--line);border-radius:14px;background:#f8f8f3;padding:10px 11px;margin:0 0 12px}.audio-monitor-head,.audio-monitor-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}.audio-monitor-head{font-size:11px;color:var(--muted);margin-bottom:6px}.audio-monitor-head strong{color:var(--ink);font-variant-numeric:tabular-nums}.audio-monitor canvas{display:block;width:100%;height:68px;border-radius:8px;background:linear-gradient(180deg,#eef3ef,#f8f8f3)}.audio-monitor-foot{font-size:11px;color:var(--muted);margin-top:6px}.audio-monitor-foot strong{color:var(--green);font-variant-numeric:tabular-nums}.timer{text-align:center;font-variant-numeric:tabular-nums;font-size:34px;font-weight:700;letter-spacing:.04em}.state{text-align:center;color:var(--muted);font-size:12px;margin:5px 0 18px}.primary{width:100%;border:0;border-radius:13px;background:var(--green);color:white;padding:13px 15px;font-weight:700}.controls{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}.secondary,.danger,.ghost{border:1px solid var(--line);border-radius:12px;background:white;padding:11px;font-weight:650}.danger{color:var(--red);border-color:#e7c8c4}.side-foot{margin-top:auto;border-top:1px solid var(--line);padding-top:14px}.sync-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:7px 0}.sync-row strong{color:var(--ink)}
     .main{min-height:650px;overflow:hidden}.meeting-head{padding:24px 26px 18px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:20px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--green);font-weight:800}.meeting-head h2{font-size:28px;letter-spacing:-.03em;margin:6px 0 5px}.meeting-head p{font-size:13px;color:var(--muted);margin:0}.live-tag{padding:8px 11px;border-radius:999px;background:#f5e0dd;color:var(--red);font-size:11px;font-weight:800;letter-spacing:.08em}.transcript{padding:26px;height:calc(100vh - 235px);min-height:535px;overflow:auto;scroll-behavior:smooth}.empty{height:100%;display:grid;place-items:center;text-align:center;color:var(--muted)}.empty .icon{width:66px;height:66px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;margin:auto auto 14px;font-size:27px}.empty h3{color:var(--ink);margin:0 0 7px;font-size:17px}.empty p{max-width:330px;font-size:13px;line-height:1.6;margin:0}
     .segment{display:grid;grid-template-columns:58px 1fr;gap:16px;padding:0 0 23px;position:relative}.segment:before{content:"";position:absolute;left:27px;top:25px;bottom:0;width:1px;background:var(--line)}.segment:last-child:before{display:none}.stamp{font-size:11px;color:var(--muted);padding-top:4px}.bubble{background:white;border:1px solid var(--line);border-radius:15px;padding:13px 15px;line-height:1.6;font-size:14px}.bubble.interim{color:var(--muted);border-style:dashed;background:#fbfaf6}.source{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#7f8c86;margin-top:7px}
     .right{padding:20px;height:calc(100vh - 112px);min-height:650px;position:sticky;top:20px;display:flex;flex-direction:column}.storage{border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:18px;background:white}.storage-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:10px}.bar{height:7px;border-radius:99px;background:#e8e9e3;overflow:hidden}.bar span{display:block;height:100%;width:0;background:var(--green);border-radius:inherit;transition:width .3s}.storage small{display:block;color:var(--muted);margin-top:8px}.history-head{display:flex;align-items:center;justify-content:space-between;margin-top:3px}.history-head button{border:0;background:transparent;color:var(--green);font-size:12px}.history{overflow:auto;margin:0 -6px;padding:0 6px}.meeting-item{width:100%;text-align:left;border:1px solid transparent;background:transparent;border-radius:14px;padding:12px;margin-bottom:5px}.meeting-item:hover,.meeting-item.active{background:white;border-color:var(--line)}.meeting-item strong{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meeting-item span{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-top:6px}.right-actions{margin-top:auto;padding-top:12px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:8px}.right-actions button{font-size:12px}.toast{position:fixed;right:28px;bottom:25px;background:#14251f;color:white;padding:12px 16px;border-radius:12px;box-shadow:0 12px 35px rgba(0,0,0,.18);font-size:13px;opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s;max-width:360px;z-index:10}.toast.show{opacity:1;transform:none}.toast.error{background:#722b28}
@@ -39,6 +39,11 @@ const page = String.raw`<!doctype html>
         <h2>Điều khiển cuộc họp</h2>
         <div class="field"><label for="title">Tên cuộc họp</label><input class="input" id="title" maxlength="120" placeholder="Ví dụ: Họp sản xuất ca sáng"></div>
         <div class="field"><label for="microphone">Thiết bị ghi âm</label><select class="input" id="microphone"><option value="">Micro mặc định</option></select></div>
+        <div class="audio-monitor">
+          <div class="audio-monitor-head"><span>Phổ âm đầu vào realtime</span><strong id="frequencyValue">-- Hz</strong></div>
+          <canvas id="audioSpectrum" width="520" height="136" aria-label="Phổ tần số âm thanh đầu vào"></canvas>
+          <div class="audio-monitor-foot"><span id="signalQuality">Chưa có tín hiệu</span><strong id="levelValue">-- dBFS</strong></div>
+        </div>
         <div class="record-orb" aria-hidden="true"></div>
         <div class="timer" id="timer">00:00:00</div>
         <div class="state" id="recordState">Sẵn sàng ghi âm</div>
@@ -67,8 +72,8 @@ const page = String.raw`<!doctype html>
   <script>
   (function(){
     "use strict";
-    var state={meetingId:null,meeting:null,parts:[],stream:null,rawStream:null,audioContext:null,sourceNode:null,gainNode:null,compressorNode:null,recorder:null,recording:false,paused:false,startedAt:0,elapsedBeforePause:0,timerHandle:null,rolloverHandle:null,sequence:0,saved:0,pending:0,recognition:null,transcript:[],interimEl:null,selectedId:null,ending:false,lastQueueJob:null};
-    var el={app:byId("app"),panel:byId("controlPanel"),title:byId("title"),mic:byId("microphone"),timer:byId("timer"),recordState:byId("recordState"),start:byId("startBtn"),pause:byId("pauseBtn"),finish:byId("finishBtn"),saved:byId("savedParts"),pending:byId("pendingParts"),speech:byId("speechState"),currentTitle:byId("currentTitle"),meetingMeta:byId("meetingMeta"),liveTag:byId("liveTag"),transcript:byId("transcript"),empty:byId("emptyState"),history:byId("history"),storageText:byId("storageText"),storageBar:byId("storageBar"),storageHint:byId("storageHint"),net:byId("netState"),refresh:byId("refreshBtn"),exportBtn:byId("exportBtn"),deleteBtn:byId("deleteBtn"),toast:byId("toast")};
+    var state={meetingId:null,meeting:null,parts:[],stream:null,rawStream:null,audioContext:null,sourceNode:null,analyserNode:null,gainNode:null,compressorNode:null,spectrumFrame:null,recorder:null,recording:false,paused:false,startedAt:0,elapsedBeforePause:0,timerHandle:null,rolloverHandle:null,sequence:0,saved:0,pending:0,recognition:null,transcript:[],interimEl:null,selectedId:null,ending:false,lastQueueJob:null};
+    var el={app:byId("app"),panel:byId("controlPanel"),title:byId("title"),mic:byId("microphone"),spectrum:byId("audioSpectrum"),frequency:byId("frequencyValue"),level:byId("levelValue"),signalQuality:byId("signalQuality"),timer:byId("timer"),recordState:byId("recordState"),start:byId("startBtn"),pause:byId("pauseBtn"),finish:byId("finishBtn"),saved:byId("savedParts"),pending:byId("pendingParts"),speech:byId("speechState"),currentTitle:byId("currentTitle"),meetingMeta:byId("meetingMeta"),liveTag:byId("liveTag"),transcript:byId("transcript"),empty:byId("emptyState"),history:byId("history"),storageText:byId("storageText"),storageBar:byId("storageBar"),storageHint:byId("storageHint"),net:byId("netState"),refresh:byId("refreshBtn"),exportBtn:byId("exportBtn"),deleteBtn:byId("deleteBtn"),toast:byId("toast")};
     function byId(id){return document.getElementById(id)}
     function api(path,options){return fetch(path,options||{}).then(async function(r){var data=null;try{data=await r.json()}catch(e){}if(!r.ok)throw new Error(data&&data.error?data.error:"Yêu cầu không thành công");return data})}
     function notify(message,isError){el.toast.textContent=message;el.toast.className="toast show"+(isError?" error":"");clearTimeout(notify.timer);notify.timer=setTimeout(function(){el.toast.className="toast"},3500)}
@@ -93,6 +98,11 @@ const page = String.raw`<!doctype html>
         state.audioContext=new AudioContextClass();
         await state.audioContext.resume();
         state.sourceNode=state.audioContext.createMediaStreamSource(state.rawStream);
+        state.analyserNode=state.audioContext.createAnalyser();
+        state.analyserNode.fftSize=2048;
+        state.analyserNode.smoothingTimeConstant=0.78;
+        state.analyserNode.minDecibels=-90;
+        state.analyserNode.maxDecibels=-10;
         state.gainNode=state.audioContext.createGain();
         state.gainNode.gain.value=2;
         state.compressorNode=state.audioContext.createDynamicsCompressor();
@@ -102,18 +112,67 @@ const page = String.raw`<!doctype html>
         state.compressorNode.attack.value=0.003;
         state.compressorNode.release.value=0.25;
         var destination=state.audioContext.createMediaStreamDestination();
-        state.sourceNode.connect(state.gainNode).connect(state.compressorNode).connect(destination);
+        state.sourceNode.connect(state.analyserNode).connect(state.gainNode).connect(state.compressorNode).connect(destination);
         state.stream=destination.stream;
+        startAudioVisualizer();
       }catch(e){
         if(state.audioContext){try{await state.audioContext.close()}catch(ignore){}}
-        state.audioContext=null;state.sourceNode=null;state.gainNode=null;state.compressorNode=null;state.stream=state.rawStream;
+        state.audioContext=null;state.sourceNode=null;state.analyserNode=null;state.gainNode=null;state.compressorNode=null;state.stream=state.rawStream;
       }
     }
+    function startAudioVisualizer(){
+      if(!state.analyserNode||!el.spectrum)return;
+      if(state.spectrumFrame)cancelAnimationFrame(state.spectrumFrame);
+      var analyser=state.analyserNode;
+      var frequencyData=new Uint8Array(analyser.frequencyBinCount);
+      var timeData=new Uint8Array(analyser.fftSize);
+      var context=el.spectrum.getContext("2d");
+      function draw(){
+        if(!state.analyserNode||state.analyserNode!==analyser)return;
+        state.spectrumFrame=requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(frequencyData);
+        analyser.getByteTimeDomainData(timeData);
+        var sum=0;
+        for(var i=0;i<timeData.length;i++){var sample=(timeData[i]-128)/128;sum+=sample*sample}
+        var rms=Math.sqrt(sum/timeData.length);
+        var db=Math.max(-100,20*Math.log10(Math.max(rms,0.00001)));
+        var sampleRate=state.audioContext?state.audioContext.sampleRate:48000;
+        var firstBin=Math.max(1,Math.floor(60*analyser.fftSize/sampleRate));
+        var lastBin=Math.min(frequencyData.length-1,Math.ceil(8000*analyser.fftSize/sampleRate));
+        var peakBin=firstBin;var peakValue=0;
+        for(var p=firstBin;p<=lastBin;p++){if(frequencyData[p]>peakValue){peakValue=frequencyData[p];peakBin=p}}
+        var dominantHz=peakBin*sampleRate/analyser.fftSize;
+        el.frequency.textContent=db>-62&&peakValue>8?Math.round(dominantHz)+" Hz":"-- Hz";
+        el.level.textContent=db.toFixed(1)+" dBFS";
+        if(db>-15){el.signalQuality.textContent="Tín hiệu rất mạnh";el.signalQuality.style.color="#b63a35"}
+        else if(db>-38){el.signalQuality.textContent="Tín hiệu tốt";el.signalQuality.style.color="#174c3c"}
+        else if(db>-55){el.signalQuality.textContent="Tín hiệu hơi yếu";el.signalQuality.style.color="#b36b18"}
+        else{el.signalQuality.textContent="Tín hiệu rất yếu";el.signalQuality.style.color="#b63a35"}
+        var rect=el.spectrum.getBoundingClientRect();var width=Math.max(220,Math.round(rect.width));var height=68;var ratio=Math.min(2,window.devicePixelRatio||1);
+        if(el.spectrum.width!==Math.round(width*ratio)||el.spectrum.height!==Math.round(height*ratio)){el.spectrum.width=Math.round(width*ratio);el.spectrum.height=Math.round(height*ratio)}
+        context.setTransform(ratio,0,0,ratio,0,0);context.clearRect(0,0,width,height);
+        var bars=48;var gap=2;var barWidth=(width-gap*(bars-1))/bars;
+        for(var b=0;b<bars;b++){
+          var start=Math.floor(firstBin+(lastBin-firstBin)*b/bars);var end=Math.max(start+1,Math.floor(firstBin+(lastBin-firstBin)*(b+1)/bars));var total=0;
+          for(var f=start;f<end;f++)total+=frequencyData[f];
+          var value=total/Math.max(1,end-start)/255;var barHeight=Math.max(2,value*height);var color=value>.82?"#b63a35":value>.55?"#b36b18":"#2a725b";
+          context.fillStyle=color;context.fillRect(b*(barWidth+gap),height-barHeight,barWidth,barHeight);
+        }
+      }
+      draw();
+    }
+    function resetAudioVisualizer(){
+      if(state.spectrumFrame)cancelAnimationFrame(state.spectrumFrame);state.spectrumFrame=null;
+      if(el.frequency)el.frequency.textContent="-- Hz";if(el.level)el.level.textContent="-- dBFS";
+      if(el.signalQuality){el.signalQuality.textContent="Chưa có tín hiệu";el.signalQuality.style.color=""}
+      if(el.spectrum){var context=el.spectrum.getContext("2d");context.clearRect(0,0,el.spectrum.width,el.spectrum.height)}
+    }
     function releaseAudio(){
+      resetAudioVisualizer();
       var streams=[state.stream,state.rawStream];
       streams.forEach(function(stream){if(stream)stream.getTracks().forEach(function(track){try{track.stop()}catch(e){}})});
       if(state.audioContext&&state.audioContext.state!=="closed")state.audioContext.close().catch(function(){});
-      state.stream=null;state.rawStream=null;state.audioContext=null;state.sourceNode=null;state.gainNode=null;state.compressorNode=null;
+      state.stream=null;state.rawStream=null;state.audioContext=null;state.sourceNode=null;state.analyserNode=null;state.gainNode=null;state.compressorNode=null;
     }
     async function startMeeting(){
       if(!window.MediaRecorder||!navigator.mediaDevices){notify("Trình duyệt này không hỗ trợ ghi âm.",true);return}
