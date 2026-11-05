@@ -67,7 +67,7 @@ const page = String.raw`<!doctype html>
   <script>
   (function(){
     "use strict";
-    var state={meetingId:null,meeting:null,stream:null,recorder:null,recording:false,paused:false,startedAt:0,elapsedBeforePause:0,timerHandle:null,rolloverHandle:null,sequence:0,saved:0,pending:0,recognition:null,transcript:[],interimEl:null,selectedId:null,ending:false,lastQueueJob:null};
+    var state={meetingId:null,meeting:null,stream:null,rawStream:null,audioContext:null,sourceNode:null,gainNode:null,compressorNode:null,recorder:null,recording:false,paused:false,startedAt:0,elapsedBeforePause:0,timerHandle:null,rolloverHandle:null,sequence:0,saved:0,pending:0,recognition:null,transcript:[],interimEl:null,selectedId:null,ending:false,lastQueueJob:null};
     var el={app:byId("app"),panel:byId("controlPanel"),title:byId("title"),mic:byId("microphone"),timer:byId("timer"),recordState:byId("recordState"),start:byId("startBtn"),pause:byId("pauseBtn"),finish:byId("finishBtn"),saved:byId("savedParts"),pending:byId("pendingParts"),speech:byId("speechState"),currentTitle:byId("currentTitle"),meetingMeta:byId("meetingMeta"),liveTag:byId("liveTag"),transcript:byId("transcript"),empty:byId("emptyState"),history:byId("history"),storageText:byId("storageText"),storageBar:byId("storageBar"),storageHint:byId("storageHint"),net:byId("netState"),refresh:byId("refreshBtn"),exportBtn:byId("exportBtn"),deleteBtn:byId("deleteBtn"),toast:byId("toast")};
     function byId(id){return document.getElementById(id)}
     function api(path,options){return fetch(path,options||{}).then(async function(r){var data=null;try{data=await r.json()}catch(e){}if(!r.ok)throw new Error(data&&data.error?data.error:"Yêu cầu không thành công");return data})}
@@ -77,22 +77,57 @@ const page = String.raw`<!doctype html>
     function currentElapsed(){return state.elapsedBeforePause+(state.recording&&!state.paused?Date.now()-state.startedAt:0)}
     function updateTimer(){el.timer.textContent=formatTime(currentElapsed())}
     function setNetwork(){var on=navigator.onLine;el.net.textContent=on?"Đang kết nối":"Mất kết nối";el.net.className="pill "+(on?"online":"offline");if(on)flushQueue()}
-    function setUi(mode){el.panel.classList.remove("recording","paused");if(mode==="recording")el.panel.classList.add("recording");if(mode==="paused")el.panel.classList.add("paused");el.start.disabled=mode!=="idle";el.title.disabled=mode!=="idle";el.mic.disabled=mode!=="idle";el.pause.disabled=mode==="idle"||mode==="ending";el.finish.disabled=mode==="idle"||mode==="ending";el.pause.textContent=mode==="paused"?"Tiếp tục":"Tạm dừng";el.liveTag.textContent=mode==="recording"?"● ĐANG GHI":mode==="paused"?"TẠM DỪNG":mode==="ending"?"ĐANG LƯU":"SẴN SÀNG";el.recordState.textContent=mode==="recording"?"Đang ghi và đồng bộ từng phần":mode==="paused"?"Đã tạm dừng ghi âm":mode==="ending"?"Đang hoàn tất dữ liệu":"Sẵn sàng ghi âm"}
+    function setUi(mode){el.panel.classList.remove("recording","paused");if(mode==="recording")el.panel.classList.add("recording");if(mode==="paused")el.panel.classList.add("paused");el.start.disabled=mode!=="idle";el.title.disabled=mode!=="idle";el.mic.disabled=mode!=="idle";el.pause.disabled=mode==="idle"||mode==="ending";el.finish.disabled=mode==="idle"||mode==="ending";el.pause.textContent=mode==="paused"?"Tiếp tục":"Tạm dừng";el.liveTag.textContent=mode==="recording"?"● ĐANG GHI":mode==="paused"?"TẠM DỪNG":mode==="ending"?"ĐANG LƯU":"SẴN SÀNG";el.recordState.textContent=mode==="recording"?"Đang ghi · tăng âm 2× · đồng bộ từng phần":mode==="paused"?"Đã tạm dừng ghi âm":mode==="ending"?"Đang hoàn tất dữ liệu":"Sẵn sàng ghi âm"}
     async function listDevices(){try{var devices=await navigator.mediaDevices.enumerateDevices();var selected=el.mic.value;el.mic.innerHTML='<option value="">Micro mặc định</option>';devices.filter(function(d){return d.kind==="audioinput"}).forEach(function(d,i){var o=document.createElement("option");o.value=d.deviceId;o.textContent=d.label||("Micro "+(i+1));el.mic.appendChild(o)});el.mic.value=selected}catch(e){}}
     function chooseMime(){var options=["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/mp4"];for(var i=0;i<options.length;i++)if(MediaRecorder.isTypeSupported(options[i]))return options[i];return ""}
+    async function prepareAudioStream(){
+      var audio={echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:{ideal:1},sampleRate:{ideal:48000},sampleSize:{ideal:16}};
+      if(el.mic.value)audio.deviceId={exact:el.mic.value};
+      state.rawStream=await navigator.mediaDevices.getUserMedia({audio:audio});
+      var rawTrack=state.rawStream.getAudioTracks()[0];
+      if(rawTrack&&"contentHint" in rawTrack)rawTrack.contentHint="speech";
+      state.stream=state.rawStream;
+      var AudioContextClass=window.AudioContext||window.webkitAudioContext;
+      if(!AudioContextClass)return;
+      try{
+        state.audioContext=new AudioContextClass();
+        await state.audioContext.resume();
+        state.sourceNode=state.audioContext.createMediaStreamSource(state.rawStream);
+        state.gainNode=state.audioContext.createGain();
+        state.gainNode.gain.value=2;
+        state.compressorNode=state.audioContext.createDynamicsCompressor();
+        state.compressorNode.threshold.value=-18;
+        state.compressorNode.knee.value=12;
+        state.compressorNode.ratio.value=4;
+        state.compressorNode.attack.value=0.003;
+        state.compressorNode.release.value=0.25;
+        var destination=state.audioContext.createMediaStreamDestination();
+        state.sourceNode.connect(state.gainNode).connect(state.compressorNode).connect(destination);
+        state.stream=destination.stream;
+      }catch(e){
+        if(state.audioContext){try{await state.audioContext.close()}catch(ignore){}}
+        state.audioContext=null;state.sourceNode=null;state.gainNode=null;state.compressorNode=null;state.stream=state.rawStream;
+      }
+    }
+    function releaseAudio(){
+      var streams=[state.stream,state.rawStream];
+      streams.forEach(function(stream){if(stream)stream.getTracks().forEach(function(track){try{track.stop()}catch(e){}})});
+      if(state.audioContext&&state.audioContext.state!=="closed")state.audioContext.close().catch(function(){});
+      state.stream=null;state.rawStream=null;state.audioContext=null;state.sourceNode=null;state.gainNode=null;state.compressorNode=null;
+    }
     async function startMeeting(){
       if(!window.MediaRecorder||!navigator.mediaDevices){notify("Trình duyệt này không hỗ trợ ghi âm.",true);return}
       var title=el.title.value.trim()||("Cuộc họp "+new Date().toLocaleString("vi-VN"));
       try{
-        var constraints={audio:el.mic.value?{deviceId:{exact:el.mic.value}}:true};state.stream=await navigator.mediaDevices.getUserMedia(constraints);await listDevices();
+        await prepareAudioStream();await listDevices();
         var created=await api("/api/meetings",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({title:title,language:"vi-VN"})});
         state.meetingId=created.id;state.selectedId=created.id;state.meeting=created;state.recording=true;state.paused=false;state.startedAt=Date.now();state.elapsedBeforePause=0;state.sequence=0;state.saved=0;state.transcript=[];state.ending=false;
         el.currentTitle.textContent=title;el.meetingMeta.textContent="Bắt đầu "+new Date().toLocaleTimeString("vi-VN")+" · Phụ đề tạm tính";clearTranscript();setUi("recording");updateTimer();state.timerHandle=setInterval(updateTimer,500);startPart();startRecognition();loadMeetings();notify("Đã bắt đầu ghi âm");
-      }catch(e){if(state.stream){state.stream.getTracks().forEach(function(t){t.stop()});state.stream=null}notify(e.message||"Không thể bắt đầu ghi âm",true)}
+      }catch(e){releaseAudio();notify(e.message||"Không thể bắt đầu ghi âm",true)}
     }
     function startPart(){
       if(!state.recording||state.paused||state.ending||!state.stream)return;
-      var mime=chooseMime();var options=mime?{mimeType:mime,audioBitsPerSecond:64000}:{audioBitsPerSecond:64000};
+      var mime=chooseMime();var options=mime?{mimeType:mime,audioBitsPerSecond:96000}:{audioBitsPerSecond:96000};
       try{var recorder=new MediaRecorder(state.stream,options);state.recorder=recorder;var chunks=[];var partStarted=Date.now();recorder.ondataavailable=function(ev){if(ev.data&&ev.data.size)chunks.push(ev.data)};recorder.onstop=function(){var blob=new Blob(chunks,{type:recorder.mimeType||mime||"audio/webm"});if(blob.size>0){var seq=state.sequence++;state.lastQueueJob=queuePart(state.meetingId,seq,blob,Date.now()-partStarted)}if(state.recording&&!state.paused&&!state.ending)setTimeout(startPart,120)};recorder.start();clearTimeout(state.rolloverHandle);state.rolloverHandle=setTimeout(function(){if(recorder.state!=="inactive")recorder.stop()},30000)}catch(e){notify("Không thể tạo phần ghi âm: "+e.message,true)}
     }
     function stopCurrentPart(){clearTimeout(state.rolloverHandle);if(state.recorder&&state.recorder.state!=="inactive")state.recorder.stop()}
@@ -100,13 +135,12 @@ const page = String.raw`<!doctype html>
     async function finishMeeting(){
       if(!state.recording||state.ending)return;if(!confirm("Kết thúc cuộc họp? Ứng dụng sẽ lưu phần ghi âm cuối và đồng bộ dữ liệu còn chờ."))return;
       state.ending=true;state.elapsedBeforePause=currentElapsed();state.recording=false;state.paused=false;clearInterval(state.timerHandle);clearTimeout(state.rolloverHandle);stopRecognition();stopCurrentPart();setUi("ending");
-      if(state.stream){state.stream.getTracks().forEach(function(t){t.stop()});state.stream=null}
-      try{await waitForRecorder();await flushQueue();await api("/api/meetings/"+encodeURIComponent(state.meetingId)+"/finish",{method:"POST"});notify(state.pending?"Cuộc họp đã kết thúc; còn dữ liệu chờ đồng bộ.":"Cuộc họp đã lưu hoàn tất");state.selectedId=state.meetingId;await openMeeting(state.meetingId);await loadMeetings()}catch(e){notify(e.message,true)}finally{state.meetingId=null;state.ending=false;setUi("idle");el.timer.textContent="00:00:00"}
+      try{await waitForRecorder();releaseAudio();await flushQueue();await api("/api/meetings/"+encodeURIComponent(state.meetingId)+"/finish",{method:"POST"});notify(state.pending?"Cuộc họp đã kết thúc; còn dữ liệu chờ đồng bộ.":"Cuộc họp đã lưu hoàn tất");state.selectedId=state.meetingId;await openMeeting(state.meetingId);await loadMeetings()}catch(e){notify(e.message,true)}finally{releaseAudio();state.meetingId=null;state.ending=false;setUi("idle");el.timer.textContent="00:00:00"}
     }
     function waitForRecorder(){return new Promise(function(resolve){var tries=0;var t=setInterval(function(){tries++;if(!state.recorder||state.recorder.state==="inactive"||tries>30){clearInterval(t);setTimeout(resolve,150)}},100)}).then(function(){return state.lastQueueJob||Promise.resolve()})}
     function startRecognition(){
       var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){el.speech.textContent="Không hỗ trợ";return}if(state.recognition)return;
-      try{var r=new SR();r.lang="vi-VN";r.continuous=true;r.interimResults=true;r.onresult=function(event){var interim="";for(var i=event.resultIndex;i<event.results.length;i++){var text=event.results[i][0].transcript.trim();if(event.results[i].isFinal){addSegment(text,currentElapsed(),false);saveTranscript(text,currentElapsed())}else interim+=text+" "}showInterim(interim.trim())};r.onerror=function(event){if(event.error!=="no-speech"&&event.error!=="aborted")el.speech.textContent="Tạm gián đoạn"};r.onend=function(){state.recognition=null;if(state.recording&&!state.paused&&!state.ending)setTimeout(startRecognition,350)};state.recognition=r;r.start();el.speech.textContent="Hoạt động"}catch(e){state.recognition=null;el.speech.textContent="Không khả dụng"}
+      try{var r=new SR();r.lang="vi-VN";r.continuous=true;r.interimResults=true;r.maxAlternatives=1;r.onresult=function(event){var interim="";for(var i=event.resultIndex;i<event.results.length;i++){var text=event.results[i][0].transcript.trim();if(event.results[i].isFinal){addSegment(text,currentElapsed(),false);saveTranscript(text,currentElapsed())}else interim+=text+" "}showInterim(interim.trim())};r.onerror=function(event){if(event.error!=="no-speech"&&event.error!=="aborted")el.speech.textContent="Tạm gián đoạn"};r.onend=function(){state.recognition=null;if(state.recording&&!state.paused&&!state.ending)setTimeout(startRecognition,350)};state.recognition=r;var speechTrack=state.stream&&state.stream.getAudioTracks()[0];try{speechTrack?r.start(speechTrack):r.start()}catch(trackError){r.start()}el.speech.textContent="Hoạt động"}catch(e){state.recognition=null;el.speech.textContent="Không khả dụng"}
     }
     function stopRecognition(){if(state.recognition){try{state.recognition.stop()}catch(e){}state.recognition=null}showInterim("")}
     function clearTranscript(){el.transcript.innerHTML="";state.interimEl=null}
