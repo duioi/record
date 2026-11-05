@@ -32,7 +32,7 @@ const page = String.raw`<!doctype html>
   <div class="shell" id="app">
     <header class="topbar">
       <div class="brand"><div class="mark">UMC</div><div><h1>Meeting Recorder</h1><p>Ghi âm an toàn · Phụ đề tiếng Việt</p></div></div>
-      <div class="topmeta"><span class="pill">Bảo vệ bởi Cloudflare Access</span><span class="pill online" id="netState">Đang kết nối</span></div>
+      <div class="topmeta"><span class="pill">Truy cập trực tiếp</span><span class="pill online" id="netState">Đang kết nối</span></div>
     </header>
     <div class="layout">
       <aside class="panel side" id="controlPanel">
@@ -143,17 +143,14 @@ function json(data, status = 200) {
 function getDeviceId(request) {
   const cookie = request.headers.get("cookie") || "";
   const match = cookie.match(
-    /(?:^|;\s*)umc_device=([0-9a-f-]{36})(?:;|$)/i
+    /(?:^|;\s*)umc_device=([0-9a-f-]{36})(?:;|$)/i,
   );
 
   return match ? match[1] : null;
 }
 
 function userFrom(request) {
-  const email = request.headers.get(
-    "cf-access-authenticated-user-email"
-  );
-
+  const email = request.headers.get("cf-access-authenticated-user-email");
   const deviceId = getDeviceId(request);
 
   return {
@@ -316,23 +313,8 @@ async function apiHandler(request, env, url, user) {
     if (!part) return new Response("Not found", { status: 404 });
     const object = await env.AUDIO.get(part.r2_key);
     if (!object) return new Response("Not found", { status: 404 });
-const headers = new Headers({
-  "content-type": "text/html; charset=utf-8",
-  "cache-control": "no-store",
-  "content-security-policy":
-    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src 'self' blob:; connect-src 'self'; img-src 'self' data:",
-  "referrer-policy": "no-referrer",
-  "x-content-type-options": "nosniff",
-});
-
-if (!getDeviceId(request)) {
-  headers.append(
-    "set-cookie",
-    `umc_device=${crypto.randomUUID()}; Path=/; Max-Age=31536000; HttpOnly; Secure; SameSite=Lax`
-  );
-}
-
-return new Response(page, { headers });    object.writeHttpMetadata(headers);
+    const headers = new Headers();
+    object.writeHttpMetadata(headers);
     headers.set("content-type", part.mime);
     headers.set("cache-control", "private, no-store");
     headers.set("content-disposition", `inline; filename="meeting-part-${audioRoute[2]}.${extensionFor(part.mime)}"`);
@@ -347,17 +329,30 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     try {
-      if (url.pathname.startsWith("/api/")) return await apiHandler(request, env, url, userFrom(request));
-      if (url.pathname !== "/") return new Response("Not found", { status: 404 });
-      return new Response(page, {
-        headers: {
-          "content-type": "text/html; charset=utf-8",
-          "cache-control": "no-store",
-          "content-security-policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src 'self' blob:; connect-src 'self'; img-src 'self' data:; frame-ancestors 'self' https://chatgpt.com https://*.chatgpt.com",
-          "referrer-policy": "no-referrer",
-          "x-content-type-options": "nosniff",
-        },
+      if (url.pathname.startsWith("/api/")) {
+        return await apiHandler(request, env, url, userFrom(request));
+      }
+
+      if (url.pathname !== "/") {
+        return new Response("Not found", { status: 404 });
+      }
+
+      const headers = new Headers({
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src 'self' blob:; connect-src 'self'; img-src 'self' data:",
+        "referrer-policy": "no-referrer",
+        "x-content-type-options": "nosniff",
       });
+
+      if (!getDeviceId(request)) {
+        headers.append(
+          "set-cookie",
+          `umc_device=${crypto.randomUUID()}; Path=/; Max-Age=31536000; HttpOnly; Secure; SameSite=Lax`,
+        );
+      }
+
+      return new Response(page, { headers });
     } catch (error) {
       console.error(error);
       if (url.pathname.startsWith("/api/")) return json({ error: "Lỗi máy chủ. Vui lòng thử lại." }, 500);
