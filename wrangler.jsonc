@@ -16,7 +16,7 @@
     {
       "binding": "DB",
       "database_name": "umc-meeting-db",
-      "database_id": "UUID_THẬT_CỦA_DATABASE",
+      "database_id": "615d9ab5-aed9-4e6e-be30-7c0f00766909",
       "migrations_dir": "migrations"
     }
   ]
