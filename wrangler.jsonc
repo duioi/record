@@ -1,23 +1,22 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "umc-meeting-recorder",
+  "name": "record",
   "main": "src/index.js",
   "compatibility_date": "2026-11-05",
   "workers_dev": true,
-  "observability": {
-    "enabled": true
-  },
+
   "r2_buckets": [
     {
       "binding": "AUDIO",
       "bucket_name": "umc-meeting-audio"
     }
   ],
+
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "umc-meeting-db",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "UUID_THẬT_CỦA_DATABASE",
       "migrations_dir": "migrations"
     }
   ]
